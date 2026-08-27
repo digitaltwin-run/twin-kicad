@@ -9,7 +9,8 @@ The package owns mechanics that can be reused without project policy:
 - a single-root S-expression tree;
 - stable node lookup helpers;
 - compatibility range scanning for existing Viewer checks;
-- validated, non-overlapping text replacements.
+- validated, non-overlapping text replacements;
+- typed inspection of PCB nets, footprints and pads;
 - deterministic rectilinear copper routing over typed geometry primitives.
 
 It does not own LLM routing, candidates, approval, event history, project
@@ -36,6 +37,16 @@ from twin_kicad.sexp import apply_replacements
 updated = apply_replacements(source, [(start, end, replacement)])
 ```
 
+PCB inspection exposes the same connectivity and placement model to every
+consumer, including both legacy `fp_text` and current `property` fields:
+
+```python
+from twin_kicad.pcb import inspect_pcb
+
+board = inspect_pcb(source)
+pad_nets = board.pad_nets()
+```
+
 The copper router accepts geometry selected by a consumer and returns track
 legs. It does not modify a board or imply approval:
 
@@ -59,7 +70,7 @@ tracks = route_edge(
 package implements KiCad syntax mechanics and must not define a competing
 style, authority or dependency vocabulary.
 
-Typed KiCad inspection and netlist/parity will be extracted only with
-consumer contract tests. Natural language interpretation and effect
-authorization stay outside this package. The copper router finds geometric
-paths only: the consumer still chooses the net, rules, candidate and approval.
+Schematic netlist normalization will be extracted only with consumer contract
+tests. Parity policy, natural language interpretation and effect authorization
+stay outside this package. The copper router finds geometric paths only: the
+consumer still chooses the net, rules, candidate and approval.

@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "twin-kicad"
-version = "0.2.0"
-description = "Shared lossless KiCad syntax and deterministic copper-routing primitives"
+version = "0.3.0"
+description = "Shared lossless KiCad syntax, typed PCB inspection and deterministic copper routing"
 readme = "README.md"
 requires-python = ">=3.11"
 license = "MIT"

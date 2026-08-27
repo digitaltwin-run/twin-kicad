@@ -12,6 +12,7 @@ from .copper import (
     route_net,
     track_is_clear,
 )
+from .pcb import PcbBoard, PcbFootprint, PcbNet, PcbPad, inspect_pcb
 from .sexp import (
     Node,
     Replacement,
@@ -38,6 +39,10 @@ __all__ = [
     "Field",
     "Node",
     "Obstacle",
+    "PcbBoard",
+    "PcbFootprint",
+    "PcbNet",
+    "PcbPad",
     "Replacement",
     "RoutingError",
     "SexpError",
@@ -49,6 +54,7 @@ __all__ = [
     "child",
     "children",
     "head",
+    "inspect_pcb",
     "number",
     "parse",
     "route_edge",
@@ -60,4 +66,4 @@ __all__ = [
     "walk",
 ]
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
