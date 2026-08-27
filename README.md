@@ -74,6 +74,21 @@ tracks = route_edge(
 )
 ```
 
+For several competing nets, `autoroute` adds bounded rip-up-and-retry while
+preserving every requested width. It prefers each task's declared layer and
+may use the other copper layer, but never narrows a track to gain reachability:
+
+```python
+from twin_kicad import Bounds, NetTask, autoroute
+
+result = autoroute(
+    [NetTask(code=1, name="GND", terminals=[(0, 0), (10, 10)], width=0.6)],
+    static=[],
+    bounds=Bounds(-1, -1, 11, 11),
+)
+assert not result.unrouted
+```
+
 ## Architectural boundary
 
 `wellmanifest/pcb` is the HOME of PCB/SCH rules and project context. This

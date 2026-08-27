@@ -1,5 +1,6 @@
 """Shared KiCad syntax and geometry primitives."""
 
+from .autoroute import AutorouteResult, NetTask, autoroute
 from .copper import (
     Bounds,
     Box,
@@ -43,11 +44,13 @@ from .sexp import (
 
 __all__ = [
     "Bounds",
+    "AutorouteResult",
     "Box",
     "Capsule",
     "Field",
     "Node",
     "NetlistComponent",
+    "NetTask",
     "NetlistError",
     "NetlistNet",
     "NetlistNode",
@@ -64,6 +67,7 @@ __all__ = [
     "Token",
     "Track",
     "apply_replacements",
+    "autoroute",
     "block_end",
     "blocks",
     "child",
@@ -82,4 +86,4 @@ __all__ = [
     "walk",
 ]
 
-__version__ = "0.4.0"
+__version__ = "0.5.0"
