@@ -23,7 +23,16 @@ from .netlist import (
     SchematicNetlist,
     parse_netlist_xml,
 )
-from .pcb import PcbBoard, PcbFootprint, PcbNet, PcbPad, inspect_pcb
+from .pcb import (
+    PcbBoard,
+    PcbFootprint,
+    PcbGraphicLine,
+    PcbNet,
+    PcbPad,
+    PcbTrack,
+    PcbVia,
+    inspect_pcb,
+)
 from .sexp import (
     Node,
     Replacement,
@@ -64,8 +73,11 @@ __all__ = [
     "Obstacle",
     "PcbBoard",
     "PcbFootprint",
+    "PcbGraphicLine",
     "PcbNet",
     "PcbPad",
+    "PcbTrack",
+    "PcbVia",
     "Replacement",
     "RoutingError",
     "SexpError",
@@ -92,4 +104,4 @@ __all__ = [
     "walk",
 ]
 
-__version__ = "0.7.0"
+__version__ = "0.8.0"

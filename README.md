@@ -10,7 +10,8 @@ The package owns mechanics that can be reused without project policy:
 - stable node lookup helpers;
 - compatibility range scanning for existing Viewer checks;
 - validated, non-overlapping text replacements;
-- typed inspection of PCB nets, footprints and pads;
+- typed inspection of PCB nets, footprints, local/absolute pad geometry,
+  tracks, vias and line-based board outlines;
 - typed normalization of Eeschema's authoritative XML netlist;
 - deterministic rectilinear copper routing over typed geometry primitives;
 - bounded two-layer maze routing with explicit track and via dimensions.
@@ -47,6 +48,8 @@ from twin_kicad.pcb import inspect_pcb
 
 board = inspect_pcb(source)
 pad_nets = board.pad_nets()
+board_bounds = board.edge_bounds()
+absolute_pad_bounds = board.footprints[0].pad_bounds(board.footprints[0].pads[0])
 ```
 
 Logical schematic connectivity comes from Eeschema rather than visual wire
