@@ -1,5 +1,17 @@
-"""Shared KiCad syntax primitives."""
+"""Shared KiCad syntax and geometry primitives."""
 
+from .copper import (
+    Bounds,
+    Box,
+    Capsule,
+    Field,
+    Obstacle,
+    RoutingError,
+    Track,
+    route_edge,
+    route_net,
+    track_is_clear,
+)
 from .sexp import (
     Node,
     Replacement,
@@ -20,10 +32,17 @@ from .sexp import (
 )
 
 __all__ = [
+    "Bounds",
+    "Box",
+    "Capsule",
+    "Field",
     "Node",
+    "Obstacle",
     "Replacement",
+    "RoutingError",
     "SexpError",
     "Token",
+    "Track",
     "apply_replacements",
     "block_end",
     "blocks",
@@ -32,11 +51,13 @@ __all__ = [
     "head",
     "number",
     "parse",
+    "route_edge",
+    "route_net",
     "text",
     "token",
     "tokenize",
+    "track_is_clear",
     "walk",
 ]
 
-__version__ = "0.1.0"
-
+__version__ = "0.2.0"
