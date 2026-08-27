@@ -12,7 +12,8 @@ The package owns mechanics that can be reused without project policy:
 - validated, non-overlapping text replacements;
 - typed inspection of PCB nets, footprints and pads;
 - typed normalization of Eeschema's authoritative XML netlist;
-- deterministic rectilinear copper routing over typed geometry primitives.
+- deterministic rectilinear copper routing over typed geometry primitives;
+- bounded two-layer maze routing with explicit track and via dimensions.
 
 It does not own LLM routing, candidates, approval, event history, project
 authority, DRC/ERC decisions or the `wellmanifest/pcb` policy vocabulary.
@@ -88,6 +89,32 @@ result = autoroute(
 )
 assert not result.unrouted
 ```
+
+Dense layouts can use the grid-based maze primitive when a short Hanan-style
+route is insufficient. Endpoints may be restricted to the actual copper area
+and layers of a pad. The result retains the exact width and via geometry used
+for collision checks:
+
+```python
+from twin_kicad import Bounds, MazeRouter
+
+router = MazeRouter(
+    Bounds(0, 0, 50, 50),
+    route_width=0.6,
+    clearance=0.2,
+    via_diameter=0.8,
+    via_drill=0.4,
+)
+start = router.region(4, 4, 6, 6, ["B.Cu"])
+goal = router.region(44, 44, 46, 46, ["B.Cu"])
+path = router.route(net=1, start=start, goal=goal)
+if path is not None:
+    tracks, vias = router.to_segments(net=1, path=path)
+```
+
+Overlapping foreign nets are fail-closed blocked cells. Coordinates outside
+the routing bounds, net zero, invalid dimensions and output widths different
+from the raster width are rejected instead of being silently corrected.
 
 ## Architectural boundary
 

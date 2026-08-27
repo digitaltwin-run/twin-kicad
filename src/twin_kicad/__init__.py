@@ -13,6 +13,7 @@ from .copper import (
     route_net,
     track_is_clear,
 )
+from .maze import BLOCKED, FREE, MazeRouter, MazeSegment, MazeVia
 from .netlist import (
     NetlistComponent,
     NetlistError,
@@ -44,10 +45,15 @@ from .sexp import (
 
 __all__ = [
     "Bounds",
+    "BLOCKED",
     "AutorouteResult",
     "Box",
     "Capsule",
     "Field",
+    "FREE",
+    "MazeRouter",
+    "MazeSegment",
+    "MazeVia",
     "Node",
     "NetlistComponent",
     "NetTask",
@@ -86,4 +92,4 @@ __all__ = [
     "walk",
 ]
 
-__version__ = "0.5.0"
+__version__ = "0.6.0"
