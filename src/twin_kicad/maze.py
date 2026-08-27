@@ -101,6 +101,7 @@ class MazeRouter:
         if cell_count > max_cells:
             raise ValueError(f"maze routing grid needs {cell_count} cells; limit is {max_cells}")
         self.owner = [[FREE] * (self.columns * self.rows) for _ in self.LAYERS]
+        self.keepout: dict[Cell, frozenset[int]] = {}
 
     def _validate_point(self, x: float, y: float) -> None:
         if not math.isfinite(x) or not math.isfinite(y):
@@ -192,6 +193,42 @@ class MazeRouter:
             raise ValueError("occupied track width must be positive and finite")
         self.occupy_box(net, layer, x0, y0, x1, y1, margin=width / 2)
 
+    def add_keepout(
+        self,
+        x0: float,
+        y0: float,
+        x1: float,
+        y1: float,
+        allow_nets: Iterable[int] = (),
+    ) -> None:
+        """Block copper under a part, except explicitly allow-listed pad nets.
+
+        Overlapping keep-outs intersect their allow-lists. The rasterized area
+        is expanded by half the configured track width so a track edge cannot
+        overlap the physical outline while its centre line remains outside.
+        """
+        values = (x0, y0, x1, y1)
+        if not all(math.isfinite(value) for value in values):
+            raise ValueError("keep-out coordinates must be finite")
+        allowed = frozenset(allow_nets)
+        for net in allowed:
+            self._validate_net(net)
+        margin = self.route_width / 2
+        left_value = max(self.bounds.x0, min(x0, x1) - margin)
+        right_value = min(self.bounds.x1, max(x0, x1) + margin)
+        bottom_value = max(self.bounds.y0, min(y0, y1) - margin)
+        top_value = min(self.bounds.y1, max(y0, y1) + margin)
+        if left_value > right_value or bottom_value > top_value:
+            return
+        left, bottom = self._clamped_cell(left_value, bottom_value)
+        right, top = self._clamped_cell(right_value, top_value)
+        for layer in range(len(self.LAYERS)):
+            for row in range(bottom, top + 1):
+                for column in range(left, right + 1):
+                    cell = (layer, column, row)
+                    previous = self.keepout.get(cell)
+                    self.keepout[cell] = allowed if previous is None else previous & allowed
+
     def region(
         self,
         x0: float,
@@ -234,7 +271,10 @@ class MazeRouter:
         return set(cells)
 
     def _open(self, net: int, layer: int, column: int, row: int) -> bool:
-        return self.owner[layer][self._index(column, row)] in (FREE, net)
+        if self.owner[layer][self._index(column, row)] not in (FREE, net):
+            return False
+        allowed = self.keepout.get((layer, column, row))
+        return allowed is None or net in allowed
 
     def _via_is_clear(self, net: int, column: int, row: int) -> bool:
         extra = max(0.0, (self.via_diameter - self.route_width) / 2)

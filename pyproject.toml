@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "twin-kicad"
-version = "0.6.0"
+version = "0.7.0"
 description = "Shared KiCad syntax, PCB inspection, netlist normalization and copper routing"
 readme = "README.md"
 requires-python = ">=3.11"

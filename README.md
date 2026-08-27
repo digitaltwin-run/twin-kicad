@@ -107,6 +107,7 @@ router = MazeRouter(
 )
 start = router.region(4, 4, 6, 6, ["B.Cu"])
 goal = router.region(44, 44, 46, 46, ["B.Cu"])
+router.add_keepout(20, 20, 30, 30, allow_nets=[1])
 path = router.route(net=1, start=start, goal=goal)
 if path is not None:
     tracks, vias = router.to_segments(net=1, path=path)
@@ -115,6 +116,8 @@ if path is not None:
 Overlapping foreign nets are fail-closed blocked cells. Coordinates outside
 the routing bounds, net zero, invalid dimensions and output widths different
 from the raster width are rejected instead of being silently corrected.
+Keep-outs block both copper layers, intersect exceptions when they overlap and
+may allow only the explicit nets needed to reach pads belonging to the part.
 
 ## Architectural boundary
 

@@ -75,6 +75,24 @@ def test_router_may_cross_only_uncontested_copper_of_its_own_net() -> None:
     assert {segment.layer for segment in segments} == {"B.Cu"}
 
 
+def test_keepout_blocks_foreign_copper_but_allows_the_parts_pad_net() -> None:
+    router = _router()
+    router.add_keepout(20, 0, 22, 50, allow_nets=[7])
+
+    assert router.route(1, (5, 25), (45, 25)) is None
+    assert router.route(7, (5, 25), (45, 25)) is not None
+
+
+def test_overlapping_keepouts_intersect_their_network_exceptions() -> None:
+    router = _router()
+    router.add_keepout(20, 0, 30, 50, allow_nets=[7, 8])
+    router.add_keepout(25, 0, 35, 50, allow_nets=[8, 9])
+
+    assert router.route(7, (5, 25), (45, 25)) is None
+    assert router.route(9, (5, 25), (45, 25)) is None
+    assert router.route(8, (5, 25), (45, 25)) is not None
+
+
 def test_wall_on_both_layers_returns_no_route_within_budget() -> None:
     router = _router()
     for layer in MazeRouter.LAYERS:
