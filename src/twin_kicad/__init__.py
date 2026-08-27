@@ -12,6 +12,15 @@ from .copper import (
     route_net,
     track_is_clear,
 )
+from .netlist import (
+    NetlistComponent,
+    NetlistError,
+    NetlistNet,
+    NetlistNode,
+    NetlistPin,
+    SchematicNetlist,
+    parse_netlist_xml,
+)
 from .pcb import PcbBoard, PcbFootprint, PcbNet, PcbPad, inspect_pcb
 from .sexp import (
     Node,
@@ -38,6 +47,11 @@ __all__ = [
     "Capsule",
     "Field",
     "Node",
+    "NetlistComponent",
+    "NetlistError",
+    "NetlistNet",
+    "NetlistNode",
+    "NetlistPin",
     "Obstacle",
     "PcbBoard",
     "PcbFootprint",
@@ -46,6 +60,7 @@ __all__ = [
     "Replacement",
     "RoutingError",
     "SexpError",
+    "SchematicNetlist",
     "Token",
     "Track",
     "apply_replacements",
@@ -57,6 +72,7 @@ __all__ = [
     "inspect_pcb",
     "number",
     "parse",
+    "parse_netlist_xml",
     "route_edge",
     "route_net",
     "text",
@@ -66,4 +82,4 @@ __all__ = [
     "walk",
 ]
 
-__version__ = "0.3.0"
+__version__ = "0.4.0"

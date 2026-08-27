@@ -11,6 +11,7 @@ The package owns mechanics that can be reused without project policy:
 - compatibility range scanning for existing Viewer checks;
 - validated, non-overlapping text replacements;
 - typed inspection of PCB nets, footprints and pads;
+- typed normalization of Eeschema's authoritative XML netlist;
 - deterministic rectilinear copper routing over typed geometry primitives.
 
 It does not own LLM routing, candidates, approval, event history, project
@@ -47,6 +48,15 @@ board = inspect_pcb(source)
 pad_nets = board.pad_nets()
 ```
 
+Logical schematic connectivity comes from Eeschema rather than visual wire
+guessing:
+
+```python
+from twin_kicad.netlist import parse_netlist_xml
+
+netlist = parse_netlist_xml(kicad_xml).as_dict("panel.kicad_sch")
+```
+
 The copper router accepts geometry selected by a consumer and returns track
 legs. It does not modify a board or imply approval:
 
@@ -70,7 +80,6 @@ tracks = route_edge(
 package implements KiCad syntax mechanics and must not define a competing
 style, authority or dependency vocabulary.
 
-Schematic netlist normalization will be extracted only with consumer contract
-tests. Parity policy, natural language interpretation and effect authorization
-stay outside this package. The copper router finds geometric paths only: the
+Parity policy, natural language interpretation and effect authorization stay
+outside this package. The copper router finds geometric paths only: the
 consumer still chooses the net, rules, candidate and approval.
