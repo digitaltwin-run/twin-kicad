@@ -96,7 +96,10 @@ class PcbFootprint:
     def pad_bounds(self, pad: PcbPad) -> tuple[float, float, float, float]:
         """Axis-aligned board bounds enclosing a potentially rotated pad."""
         x, y = self.pad_center(pad)
-        radians = math.radians(self.rotation + pad.rotation)
+        # KiCad stores the pad orientation in board coordinates. Rotating a
+        # footprint updates both its own angle and every pad's `(at ... angle)`;
+        # adding the two would rotate rectangular pad bounds twice.
+        radians = math.radians(pad.rotation)
         cosine, sine = abs(math.cos(radians)), abs(math.sin(radians))
         half_x = cosine * pad.width / 2 + sine * pad.height / 2
         half_y = sine * pad.width / 2 + cosine * pad.height / 2

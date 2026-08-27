@@ -52,6 +52,9 @@ board_bounds = board.edge_bounds()
 absolute_pad_bounds = board.footprints[0].pad_bounds(board.footprints[0].pads[0])
 ```
 
+Footprint-local pad coordinates are transformed by the footprint placement;
+pad angles are already board-absolute, matching KiCad's saved PCB semantics.
+
 Logical schematic connectivity comes from Eeschema rather than visual wire
 guessing:
 

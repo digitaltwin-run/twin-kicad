@@ -19,7 +19,7 @@ PCB = '''(kicad_pcb
     (property "Value" "Button")
     (fp_line (start -2 -3) (end 2 3) (layer "F.SilkS"))
     (pad "1" thru_hole circle
-      (at 1.5 -2)
+      (at 1.5 -2 90)
       (size 1 2)
       (layers "*.Cu" "*.Mask")
       (net 1 "GND")
@@ -45,6 +45,7 @@ def test_inspection_returns_typed_board_connectivity_and_placement() -> None:
     assert board.footprints[0].uuid == "fp-1"
     assert board.footprints[0].rotation == 90
     assert board.footprints[0].pads[0].uuid == "pad-1"
+    assert board.footprints[0].pads[0].rotation == 90
     assert (board.footprints[0].pads[0].x, board.footprints[0].pads[0].y) == (1.5, -2)
     assert board.footprints[0].pads[0].copper_layers == ("F.Cu", "B.Cu")
     assert board.footprints[0].pad_center(board.footprints[0].pads[0]) == pytest.approx(
