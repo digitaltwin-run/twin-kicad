@@ -102,6 +102,7 @@ class MazeRouter:
             raise ValueError(f"maze routing grid needs {cell_count} cells; limit is {max_cells}")
         self.owner = [[FREE] * (self.columns * self.rows) for _ in self.LAYERS]
         self.keepout: dict[Cell, frozenset[int]] = {}
+        self.via_keepout: set[tuple[int, int]] = set()
 
     def _validate_point(self, x: float, y: float) -> None:
         if not math.isfinite(x) or not math.isfinite(y):
@@ -193,6 +194,35 @@ class MazeRouter:
             raise ValueError("occupied track width must be positive and finite")
         self.occupy_box(net, layer, x0, y0, x1, y1, margin=width / 2)
 
+    def occupy_via(
+        self,
+        net: int,
+        x: float,
+        y: float,
+        diameter: float | None = None,
+    ) -> None:
+        """Reserve a through-via on every routing layer.
+
+        A layer change emitted for one net is an obstacle for tracks routed
+        later.  Reserving only the adjacent track centreline misses the via
+        annulus on the other layer and can produce a board that passes the
+        raster model but fails KiCad clearance DRC.
+        """
+        selected_diameter = self.via_diameter if diameter is None else diameter
+        values = (x, y, selected_diameter)
+        if not all(math.isfinite(value) for value in values) or selected_diameter <= 0:
+            raise ValueError("occupied via geometry must be positive and finite")
+        radius = selected_diameter / 2
+        for layer in self.LAYERS:
+            self.occupy_box(
+                net,
+                layer,
+                x - radius,
+                y - radius,
+                x + radius,
+                y + radius,
+            )
+
     def add_keepout(
         self,
         x0: float,
@@ -228,6 +258,39 @@ class MazeRouter:
                     cell = (layer, column, row)
                     previous = self.keepout.get(cell)
                     self.keepout[cell] = allowed if previous is None else previous & allowed
+
+    def add_via_keepout(
+        self,
+        x0: float,
+        y0: float,
+        x1: float,
+        y1: float,
+        margin: float = 0.0,
+    ) -> None:
+        """Zabroń zmiany warstwy w obszarze bez blokowania ścieżek.
+
+        Pad SMD musi pozostać osiągalny na swojej warstwie, ale nie oznacza to,
+        że router może użyć jego powierzchni jako miejsca na via. ``margin``
+        pozwala rozszerzyć obszar o promień pierścienia, gdy polityka zabrania
+        również nachodzenia via na pad.
+        """
+        values = (x0, y0, x1, y1, margin)
+        if not all(math.isfinite(value) for value in values) or margin < 0:
+            raise ValueError("via keep-out must be finite with a non-negative margin")
+        left_value = max(self.bounds.x0, min(x0, x1) - margin)
+        right_value = min(self.bounds.x1, max(x0, x1) + margin)
+        bottom_value = max(self.bounds.y0, min(y0, y1) - margin)
+        top_value = min(self.bounds.y1, max(y0, y1) + margin)
+        if left_value > right_value or bottom_value > top_value:
+            return
+        left, bottom = self._clamped_cell(left_value, bottom_value)
+        right, top = self._clamped_cell(right_value, top_value)
+        for row in range(bottom, top + 1):
+            for column in range(left, right + 1):
+                x, y = self.point(column, row)
+                if (left_value - 1e-9 <= x <= right_value + 1e-9
+                        and bottom_value - 1e-9 <= y <= top_value + 1e-9):
+                    self.via_keepout.add((column, row))
 
     def region(
         self,
@@ -277,6 +340,8 @@ class MazeRouter:
         return allowed is None or net in allowed
 
     def _via_is_clear(self, net: int, column: int, row: int) -> bool:
+        if (column, row) in self.via_keepout:
+            return False
         extra = max(0.0, (self.via_diameter - self.route_width) / 2)
         reach = math.ceil(extra / self.pitch)
         for layer in range(len(self.LAYERS)):

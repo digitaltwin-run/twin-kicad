@@ -83,6 +83,41 @@ def test_keepout_blocks_foreign_copper_but_allows_the_parts_pad_net() -> None:
     assert router.route(7, (5, 25), (45, 25)) is not None
 
 
+def test_via_keepout_moves_the_layer_change_without_blocking_pad_copper() -> None:
+    router = _router()
+    start = router.region(24.5, 24.5, 25.5, 25.5, ["F.Cu"])
+    goal = router.region(24.5, 24.5, 25.5, 25.5, ["B.Cu"])
+    router.add_via_keepout(24, 24, 26, 26, margin=0.4)
+
+    path = router.route(1, start, goal)
+    assert path is not None
+    _segments, vias = router.to_segments(1, path)
+
+    assert len(vias) == 1
+    assert not (24 - 0.4 <= vias[0].x <= 26 + 0.4
+                and 24 - 0.4 <= vias[0].y <= 26 + 0.4)
+
+
+def test_occupied_via_blocks_foreign_tracks_on_both_layers() -> None:
+    router = _router()
+    router.occupy_via(1, 25, 25)
+
+    for layer in range(len(router.LAYERS)):
+        assert not router._open(2, layer, *router.cell(25, 25))
+        assert router._open(1, layer, *router.cell(25, 25))
+
+
+def test_occupied_via_reserves_annulus_and_track_clearance() -> None:
+    router = _router()
+    router.occupy_via(1, 25, 25)
+
+    layer = router.LAYERS.index("B.Cu")
+    # 0.4 mm via radius + 0.2 mm clearance + routed-track radius; the
+    # occupancy is conservatively rounded outwards to the 0.5 mm grid.
+    assert not router._open(2, layer, *router.cell(25.75, 25))
+    assert router._open(2, layer, *router.cell(26.5, 25))
+
+
 def test_overlapping_keepouts_intersect_their_network_exceptions() -> None:
     router = _router()
     router.add_keepout(20, 0, 30, 50, allow_nets=[7, 8])
