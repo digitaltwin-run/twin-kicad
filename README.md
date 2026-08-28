@@ -15,6 +15,8 @@ The package owns mechanics that can be reused without project policy:
 - typed normalization of Eeschema's authoritative XML netlist;
 - deterministic rectilinear copper routing over typed geometry primitives;
 - bounded two-layer maze routing with explicit track and via dimensions.
+- component asset integrity: standalone footprint inspection, complete pad maps,
+  pinned SHA-256 assets and 3D-model bindings.
 
 It does not own LLM routing, candidates, approval, event history, project
 authority, DRC/ERC decisions or the `wellmanifest/pcb` policy vocabulary.
@@ -124,6 +126,26 @@ the routing bounds, net zero, invalid dimensions and output widths different
 from the raster width are rejected instead of being silently corrected.
 Keep-outs block both copper layers, intersect exceptions when they overlap and
 may allow only the explicit nets needed to reach pads belonging to the part.
+
+Component manifests remain policy documents owned by `wellmanifest/pcb`.
+`twin-kicad` implements only deterministic checks against their data:
+
+```python
+from pathlib import Path
+from twin_kicad import validate_component_file
+
+report = validate_component_file(
+    Path("components/manifests/switch.json"),
+    Path("."),
+    source_ids={"kicad-footprints"},
+)
+assert report.errors == 0
+```
+
+The validator requires every physical pad to appear exactly once in the pin
+map, verifies footprint/model hashes and refuses assets escaping the project
+root. Selection policy (`qualified` versus inherited debt) stays with the
+standard and adopter.
 
 ## Architectural boundary
 

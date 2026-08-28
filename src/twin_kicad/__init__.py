@@ -1,6 +1,15 @@
 """Shared KiCad syntax and geometry primitives."""
 
 from .autoroute import AutorouteResult, NetTask, autoroute
+from .component import (
+    ComponentFinding,
+    ComponentManifestError,
+    ComponentReport,
+    pin_map_hash,
+    sha256_file,
+    validate_component_file,
+    validate_component_manifest,
+)
 from .copper import (
     Bounds,
     Box,
@@ -31,6 +40,7 @@ from .pcb import (
     PcbPad,
     PcbTrack,
     PcbVia,
+    inspect_footprint,
     inspect_pcb,
 )
 from .sexp import (
@@ -58,6 +68,9 @@ __all__ = [
     "AutorouteResult",
     "Box",
     "Capsule",
+    "ComponentFinding",
+    "ComponentManifestError",
+    "ComponentReport",
     "Field",
     "FREE",
     "MazeRouter",
@@ -92,16 +105,21 @@ __all__ = [
     "children",
     "head",
     "inspect_pcb",
+    "inspect_footprint",
     "number",
     "parse",
     "parse_netlist_xml",
+    "pin_map_hash",
     "route_edge",
     "route_net",
+    "sha256_file",
     "text",
     "token",
     "tokenize",
     "track_is_clear",
+    "validate_component_file",
+    "validate_component_manifest",
     "walk",
 ]
 
-__version__ = "0.8.1"
+__version__ = "0.9.0"

@@ -289,3 +289,11 @@ def inspect_pcb(source: str | Node) -> PcbBoard:
         vias=tuple(_via(node) for node in children(root, "via")),
         graphics=tuple(_line(node) for node in children(root, "gr_line")),
     )
+
+
+def inspect_footprint(source: str | Node) -> PcbFootprint:
+    """Inspect a standalone ``.kicad_mod`` without inventing board context."""
+    root = parse(source) if isinstance(source, str) else source
+    if head(root) not in {"footprint", "module"}:
+        raise SexpError("expected a footprint root expression")
+    return _footprint(root)
