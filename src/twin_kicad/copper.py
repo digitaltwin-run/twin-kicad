@@ -69,7 +69,10 @@ def _clamp(value: float, low: float, high: float) -> float:
     return low if value < low else high if value > high else value
 
 
-def _point_segment_distance(px: float, py: float, ax: float, ay: float, bx: float, by: float) -> float:
+def point_segment_distance(
+    px: float, py: float, ax: float, ay: float, bx: float, by: float
+) -> float:
+    """Return the shortest centerline distance from a point to a segment."""
     dx, dy = bx - ax, by - ay
     length_sq = dx * dx + dy * dy
     if length_sq < _EPS:
@@ -78,7 +81,7 @@ def _point_segment_distance(px: float, py: float, ax: float, ay: float, bx: floa
     return math.hypot(px - (ax + t * dx), py - (ay + t * dy))
 
 
-def _segments_intersect(
+def segments_intersect(
     ax: float,
     ay: float,
     bx: float,
@@ -88,6 +91,7 @@ def _segments_intersect(
     dx: float,
     dy: float,
 ) -> bool:
+    """Return whether two segments cross at an interior point."""
     def cross(ox: float, oy: float, px: float, py: float, qx: float, qy: float) -> float:
         return (px - ox) * (qy - oy) - (py - oy) * (qx - ox)
 
@@ -98,7 +102,7 @@ def _segments_intersect(
     return ((d1 > 0) != (d2 > 0)) and ((d3 > 0) != (d4 > 0))
 
 
-def _segment_distance(
+def segment_distance(
     ax: float,
     ay: float,
     bx: float,
@@ -108,17 +112,19 @@ def _segment_distance(
     dx: float,
     dy: float,
 ) -> float:
-    if _segments_intersect(ax, ay, bx, by, cx, cy, dx, dy):
+    """Return the shortest centerline distance between two segments."""
+    if segments_intersect(ax, ay, bx, by, cx, cy, dx, dy):
         return 0.0
     return min(
-        _point_segment_distance(ax, ay, cx, cy, dx, dy),
-        _point_segment_distance(bx, by, cx, cy, dx, dy),
-        _point_segment_distance(cx, cy, ax, ay, bx, by),
-        _point_segment_distance(dx, dy, ax, ay, bx, by),
+        point_segment_distance(ax, ay, cx, cy, dx, dy),
+        point_segment_distance(bx, by, cx, cy, dx, dy),
+        point_segment_distance(cx, cy, ax, ay, bx, by),
+        point_segment_distance(dx, dy, ax, ay, bx, by),
     )
 
 
-def _segment_box_distance(ax: float, ay: float, bx: float, by: float, box: Box) -> float:
+def segment_box_distance(ax: float, ay: float, bx: float, by: float, box: Box) -> float:
+    """Return the shortest distance from a segment centerline to a closed box."""
     inside_a = box.x0 <= ax <= box.x1 and box.y0 <= ay <= box.y1
     inside_b = box.x0 <= bx <= box.x1 and box.y0 <= by <= box.y1
     if inside_a or inside_b:
@@ -130,7 +136,7 @@ def _segment_box_distance(ax: float, ay: float, bx: float, by: float, box: Box) 
         (box.x0, box.y1),
     )
     return min(
-        _segment_distance(
+        segment_distance(
             ax,
             ay,
             bx,
@@ -176,7 +182,7 @@ class Field:
                 continue
             if isinstance(obstacle, Capsule):
                 gap = (
-                    _segment_distance(
+                    segment_distance(
                         track.x0,
                         track.y0,
                         track.x1,
@@ -190,7 +196,9 @@ class Field:
                     - obstacle.radius
                 )
             else:
-                gap = _segment_box_distance(track.x0, track.y0, track.x1, track.y1, obstacle) - half_width
+                gap = segment_box_distance(
+                    track.x0, track.y0, track.x1, track.y1, obstacle
+                ) - half_width
             # Clearance equal to the requirement is valid. The tolerance also
             # protects candidate grids from ordinary floating-point rounding.
             if gap < clearance - _EPS:

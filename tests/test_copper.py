@@ -2,7 +2,16 @@ from __future__ import annotations
 
 import pytest
 
-from twin_kicad.copper import Bounds, Box, RoutingError, route_edge, route_net, track_is_clear
+from twin_kicad.copper import (
+    Bounds,
+    Box,
+    RoutingError,
+    route_edge,
+    route_net,
+    segment_box_distance,
+    segment_distance,
+    track_is_clear,
+)
 
 
 def test_route_edge_returns_clear_path_around_foreign_pad() -> None:
@@ -67,3 +76,9 @@ def test_collinear_pads_are_unaffected_by_the_tap_in_rule() -> None:
     )
 
     assert _length(tracks) == pytest.approx(140.86, abs=0.01)
+
+
+def test_public_distance_primitives_measure_centerlines_and_box_edges() -> None:
+    assert segment_distance(0, 0, 4, 0, 2, 3, 2, 5) == 3
+    assert segment_distance(0, 0, 4, 0, 2, -1, 2, 1) == 0
+    assert segment_box_distance(0, 0, 4, 0, Box(1, 1, 2, 3, 4)) == 2
